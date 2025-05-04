@@ -17,10 +17,18 @@ permissions:
   pull-requests: write
 
 jobs:
-  terraform-plan:
-    name: Terraform Plan, Validate, and Comment for the main environment
+  terraform-plan-dev:
+    name: Dev - Terraform Plan, Validate, and Comment
     uses: ./.github/workflows/terraform-init-validate-plan-comment.yml
     with:
-      working-directory: 'environments/main'
-      var-file-path: 'config/projects.tfvars'
+      environment: 'dev'
+      working-directory: 'environments/dev'
+    secrets: inherit
+
+  terraform-plan-prod:
+    name: Prod - Terraform Plan, Validate, and Comment
+    uses: ./.github/workflows/terraform-init-validate-plan-comment.yml
+    with:
+      environment: 'prod'
+      working-directory: 'environments/prod'
     secrets: inherit
