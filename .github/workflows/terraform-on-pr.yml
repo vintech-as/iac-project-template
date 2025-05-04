@@ -1,10 +1,15 @@
 name: Run Terraform Plan
 
 on:
-  pull_request:
-    paths:
-      - '**/*.tf'
-      - '**/*.tfvars'
+  workflow_dispatch:
+  # Remove workflow_dispatch and uncomment the following lines to enable automatic triggering on push events
+  # push:
+  #   branches:
+  #     - master
+  #   paths:
+  #     - '**/*.tf'
+  #     - '**/*.tfvars'
+  # Uncomment the following lines to enable automatic triggering on pull request events
 
 permissions:
   id-token: write
