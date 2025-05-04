@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy Infrastructure to Prod
+    name: Deploy to Prod
     uses: ./.github/workflows/terraform-apply.yml
     if: github.ref == 'refs/heads/master'
     with:

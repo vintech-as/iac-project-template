@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy Infrastructure to Dev
+    name: Deploy to Dev
     uses: ./.github/workflows/terraform-apply.yml
     with:
       environment: dev
