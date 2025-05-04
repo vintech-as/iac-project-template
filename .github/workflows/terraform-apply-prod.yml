@@ -1,0 +1,21 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/terraform-apply.yml
+    if: github.ref == 'refs/heads/master'
+    with:
+      environment: prod
+      working-directory: terraform/prod
+      aws-region: eu-west-1
+      approvers: haraldvinje
+      minimum-approvals: 1
+    secrets: inherit

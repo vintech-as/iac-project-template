@@ -1,0 +1,110 @@
+name: Terraform Apply
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: "Environment to deploy to"
+      working-directory:
+        required: true
+        type: string
+        description: "Directory containing Terraform configuration"
+      approvers:
+        required: true
+        type: string
+        description: "GitHub usernames that can approve the deployment"
+      aws-region:
+        required: false
+        type: string
+        default: "eu-west-1"
+        description: "AWS region for deployment"
+      minimum-approvals:
+        required: false
+        type: number
+        default: 1
+        description: "Minimum number of approvals required"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: ${{ inputs.working-directory }}
+        run: terraform init
+
+      - name: Terraform Validate
+        working-directory: ${{ inputs.working-directory }}
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          terraform plan
+
+  manual-approval:
+    name: Manual Approval
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    if: success()
+
+    permissions:
+      issues: write
+
+    steps:
+      - name: Await Manual Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: ${{ inputs.approvers }}
+          minimum-approvals: ${{ inputs.minimum-approvals }}
+          issue-title: "Manual Approval Required for Terraform Apply"
+          issue-body: "Please approve or deny the deployment."
+
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: manual-approval
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init, Plan and Apply
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          terraform init
+          terraform validate -no-color
+          terraform plan \
+            -no-color \
+            -out=tfplan
+          terraform apply -auto-approve tfplan

@@ -1,0 +1,26 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - "**/*.tf"
+      - "**/*.tfvars"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/terraform-apply.yml
+    with:
+      environment: dev
+      working-directory: environments/dev
+      aws-region: eu-west-1
+      approvers: haraldvinje
+      minimum-approvals: 1
+    secrets: inherit
