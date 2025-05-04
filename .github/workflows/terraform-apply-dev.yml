@@ -2,12 +2,12 @@ name: Deploy Infrastructure to Dev
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - "**/*.tf"
-      - "**/*.tfvars"
+# push:
+#   branches:
+#     - master
+#   paths:
+#     - "**/*.tf"
+#     - "**/*.tfvars"
 
 permissions:
   id-token: write
