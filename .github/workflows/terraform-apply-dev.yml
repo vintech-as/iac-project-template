@@ -1,4 +1,4 @@
-name: Deploy Infrastructure
+name: Deploy Infrastructure to Dev
 
 on:
   workflow_dispatch:
@@ -13,9 +13,11 @@ permissions:
   id-token: write
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   deploy:
+    name: Deploy Infrastructure to Dev
     uses: ./.github/workflows/terraform-apply.yml
     with:
       environment: dev
